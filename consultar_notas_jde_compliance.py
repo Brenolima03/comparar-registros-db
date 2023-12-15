@@ -8,6 +8,7 @@ def criar_conexao_oracle(usuario, senha, tns_name):
         # Tenta estabelecer a conexão.
         conexao = cx_Oracle.connect(f'{usuario}/{senha}@{tns_name}')
         return conexao
+    
     except cx_Oracle.Error as e:
         # Levanta uma exceção se houver um erro ao conectar.
         raise ValueError(f"Erro ao conectar ao Oracle: {e}")
@@ -22,6 +23,7 @@ def executar_query(conexao, query):
         if resultado is not None:
             # Formatando o retorno para remover os espaços e transformar em tupla.
             resultado = tuple(map(str.strip, resultado))
+
     return resultado
 
 # Função para comparar notas entre dois sistemas.
@@ -39,10 +41,13 @@ def comparar_notas(conexao, lista_de_notas, tabela, campo_nota, campo_serie):
             if not resultado:
                 # Adiciona a nota à lista se não houver resultado.
                 notas_faltando_jde.append(nota)
+
         except Exception as e:
             print(f"Erro ao executar a consulta para a nota {nota}: {str(e)}")
 
-    return notas_faltando_jde
+    print("Notas faltando no JDE:")
+    for nota in notas_faltando_jde:
+        print(nota)
 
 with open('notas_para_comparar.txt', 'r') as notas_para_comparar:
     # Lê as notas do arquivo e remove espaços em branco.
@@ -54,7 +59,3 @@ load_dotenv()
 # Cria a conexão Oracle usando as variáveis de ambiente.
 with criar_conexao_oracle(os.getenv("ORACLE_USUARIO"), os.getenv("ORACLE_SENHA"), os.getenv("ORACLE_TNS_NAME")) as conexao:
     notas_faltando_jde = comparar_notas(conexao, lista_de_notas, 'DBRDTA.f47011', 'SYCACT', 'SYAUTN')
-
-print("Notas faltando no JDE:")
-for nota in notas_faltando_jde:
-    print(nota)
