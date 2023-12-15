@@ -27,7 +27,8 @@ def executar_query(conexao, query):
 # Função para comparar notas entre dois sistemas.
 def comparar_notas(conexao, lista_de_notas, tabela, campo_nota, campo_serie):
     notas_faltando_jde = []
-    for nota in lista_de_notas:
+    # Faz a consulta apenas se a linha contém uma nota válida.
+    for nota in [nota for nota in lista_de_notas if '/' in nota]:
         # Formatando tanto o número quanto a série da nota para definir onde termina ou começa cada um, dependendo de onde está o '/'.
         query = f"SELECT {campo_nota} FROM {tabela} WHERE {campo_nota} = '{nota[:-3] if '/' in nota[:-2] else nota[:-2]}' \
         AND {campo_serie} = '{nota[-2:] if '/' in nota[:-2] else nota[-1]}'"
@@ -52,7 +53,6 @@ load_dotenv()
 
 # Cria a conexão Oracle usando as variáveis de ambiente.
 with criar_conexao_oracle(os.getenv("ORACLE_USUARIO"), os.getenv("ORACLE_SENHA"), os.getenv("ORACLE_TNS_NAME")) as conexao:
-    # Compara as notas entre os sistemas
     notas_faltando_jde = comparar_notas(conexao, lista_de_notas, 'DBRDTA.f47011', 'SYCACT', 'SYAUTN')
 
 print("Notas faltando no JDE:")
