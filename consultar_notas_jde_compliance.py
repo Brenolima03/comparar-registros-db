@@ -11,11 +11,11 @@ def criar_conexao_oracle(usuario, senha, tns_name):
         # Lança uma exceção com uma mensagem personalizada se houver um erro
         raise ValueError(f"Erro ao conectar ao Oracle: {e}")
 
-def executar_query(conexao, query, parametros):
+def executar_query(conexao, query):
     resultados = []
     with conexao.cursor() as cursor:
         # Executa a consulta SQL usando o cursor
-        cursor.execute(query, parametros)
+        cursor.execute(query)
         # Obtém todos os resultados da consulta
         resultados = cursor.fetchall()
     return resultados
@@ -23,16 +23,15 @@ def executar_query(conexao, query, parametros):
 def comparar_notas(conexao, lista_de_notas, tabela, campo_nota, campo_serie):
     for nota in lista_de_notas:
         # Extrai o número da nota e a série
-        numero_nota = ''.join(filter(str.isdigit, nota))
+        numero_nota = nota[:-3] if '/' in nota[:-2] else nota[:-2]
         serie = nota[-2:] if '/' in nota[:-2] else nota[-1]
 
         # Constrói a consulta SQL usando formatação de string
-        query = f"SELECT {campo_nota} FROM {tabela} WHERE {campo_nota} = :nota_numero AND {campo_serie} = :serie"
-        parametros_para_consulta = {'nota_numero': numero_nota, 'serie': serie}
+        query = f"SELECT {campo_nota} FROM {tabela} WHERE {campo_nota} = '{numero_nota}' AND {campo_serie} = '{serie}'"
         
         try:
             # Executa a consulta usando a função definida anteriormente
-            resultados = executar_query(conexao, query, parametros_para_consulta)
+            resultados = executar_query(conexao, query)
             if not resultados:
                 print(f"A nota {nota} não está presente em {tabela}.")
             else:
